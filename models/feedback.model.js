@@ -3,6 +3,7 @@ import { toJSON } from "@reis/mongoose-to-json";
 
 const feedbackSchema = new Schema({
     user: {type: Types.ObjectId, ref: 'User', required: true},
+    subject: {type: String, required: true},
     message: { type: String, required: true}
 }, {
     timestamps: true

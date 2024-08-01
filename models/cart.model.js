@@ -1,4 +1,4 @@
-import { Schema, Types } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 import { toJSON } from "@reis/mongoose-to-json";
 
 const cartItemSchema = new Schema({
@@ -11,7 +11,7 @@ const cartItemSchema = new Schema({
 
   cartItemSchema.plugin(toJSON)
   
-  export const CartItem = mongoose.model('CartItem', cartItemSchema);
+  export const CartItem = model('CartItem', cartItemSchema);
 
 
 

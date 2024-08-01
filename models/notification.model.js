@@ -1,4 +1,4 @@
-import {Schema, Types} from 'mongoose';
+import {model, Schema, Types} from 'mongoose';
 import { toJSON } from '@reis/mongoose-to-json';
 
 const notificationSchema = new Schema({
@@ -12,4 +12,4 @@ const notificationSchema = new Schema({
 
 notificationSchema.plugin(toJSON)
 
-export const Notification = mongoose.model('Notification', notificationSchema);
+export const Notification = model('Notification', notificationSchema);
