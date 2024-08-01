@@ -10,6 +10,6 @@ const customerSchema = new Schema({
     timestamps: true
 });
 
-shopperSchema.plugin(toJSON)
+customerSchema.plugin(toJSON)
 
 export const CustomerModel = model('Customer', customerSchema)

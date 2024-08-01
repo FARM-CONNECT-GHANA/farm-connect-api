@@ -1,6 +1,7 @@
 import express from "express";
 import cors from 'cors';
 import { dbConnection } from "./config/db.js";
+import userRoutes from "./routes/user.routes.js";
 
 // create express app
 const farmconnectapp = express();
@@ -8,6 +9,7 @@ const farmconnectapp = express();
 // Apply middleware
 farmconnectapp.use(cors({credentials: true, origin: '*'}));
 farmconnectapp.use(express.json());
+farmconnectapp.use('/users', userRoutes)
 
 
 // Listen for incoming requests
