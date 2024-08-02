@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { loginValidator, registerValidator } from '../utils/validation.js';
+import { customerValidator, loginValidator, registerValidator } from '../utils/validation.js';
 import { UserModel } from '../models/user.model.js';
 import { FarmerModel } from '../models/farmer.model.js';
 import { CustomerModel } from '../models/customer.model.js';
@@ -65,15 +65,61 @@ export const tokenLogin = async (req, res, next) => {
     }
   };
 
-// Function to get farmer profile
+// function to create farmer profile
+export const createFarmerProfile = async (req, res, next) => {
+    try {
+        const user = req.user.id; // Get the user ID from req.user
+        const { farmName, farmAddress, products, farmType, bankAccountDetails } = req.body;
+
+        // Validate the input using Joi
+        const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails });
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        // Validate that the user exists
+        const userExists = await UserModel.findById(user);
+        if (!userExists) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Create a new farmer profile
+        const newFarmer = await FarmerModel.create({
+            user,
+            farmName,
+            farmAddress,
+            products,
+            farmType,
+            bankAccountDetails
+        });
+
+        res.status(201).json(newFarmer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while creating the farmer profile' });
+        next(error);
+    }
+};
+
+// function to get farmer profile
 export const getFarmerProfile = async (req, res, next) => {
     try {
-        const userId = req.user.id; 
+        const { id } = req.params; // ID from request parameters (for customer view)
+        const userId = req.user.id; // ID of the logged-in user (for farmer's own view)
 
-        // Find the farmer document associated with the user
-        const farmer = await FarmerModel.findOne({ user: userId })
-            .populate('user', 'firstName lastName email phone location publicProfile') // Populate user details
-            .populate('products') // Populate related products
+        let farmer;
+
+        if (id) {
+            // If ID is provided in the request params, customer is viewing the farmer's profile
+            farmer = await FarmerModel.findById(id)
+                .populate('user', 'firstName lastName email phone location publicProfile')
+                .populate('products');
+        } else {
+            // If no ID is provided, the farmer is viewing their own profile
+            farmer = await FarmerModel.findOne({ user: userId })
+                .populate('user')
+                .populate('products');
+        }
 
         if (!farmer) {
             return res.status(404).json({ message: 'Farmer profile not found' });
@@ -85,25 +131,80 @@ export const getFarmerProfile = async (req, res, next) => {
     }
 };
 
-// Function to enable customers view farmer profile
-export const getFarmerDetails = async (req, res, next) => {
-  try {
-    const { id } = req.params; 
-    
-    // Fetch the farmer profile
-    const farmer = await FarmerModel.findById(id)
-      .populate('user', 'firstName lastName email phone location publicProfile') // Populate user details
-      .populate('products'); // Populate products details
-    
-    if (!farmer) {
-      return res.status(404).json({ message: 'Farmer not found' });
+// function to update farmer profile
+export const updateFarmerProfile = async (req, res, next) => {
+    try {
+        const userId = req.user.id; // Get the user ID from req.user
+        const { farmName, farmAddress, products, farmType, bankAccountDetails } = req.body;
+
+        // Validate the input using Joi
+        const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails });
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        // Check if the farmer profile exists for this user
+        const farmerExists = await FarmerModel.findOne({ user: userId });
+        if (!farmerExists) {
+            return res.status(404).json({ message: 'Farmer profile not found' });
+        }
+
+        // Prepare the update object
+        const updateData = {
+            farmName,
+            farmAddress,
+            products,
+            farmType,
+            bankAccountDetails
+        };
+
+        // Update the farmer profile
+        const updatedFarmer = await FarmerModel.findOneAndUpdate(
+            { user: userId },
+            { $set: updateData },
+            { new: true, runValidators: true } // Returns the updated document and applies schema validators
+        );
+
+        res.status(200).json(updatedFarmer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while updating the farmer profile' });
+        next(error);
     }
-    
-    // Return the farmer details
-    res.status(200).json(farmer);
-  } catch (error) {
-    next(error);
-  }
+};
+
+// function to create customer profile
+export const createCustomerProfile = async (req, res, next) => {
+    try {
+        const user = req.user.id; // Get the user ID from req.user
+        const { preferredPaymentMethod, orderHistory, cart } = req.body;
+
+        // Validate the input using Joi
+        const { error } = customerValidator.validate({ preferredPaymentMethod });
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        // Validate that the user exists (though typically, if you have req.user, the user is already authenticated)
+        const userExists = await UserModel.findById(user);
+        if (!userExists) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Create a new customer profile
+        const newCustomer = await CustomerModel.create({
+            user,
+            preferredPaymentMethod,
+            orderHistory,
+            cart
+        });
+
+        res.status(201).json(newCustomer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while creating the customer profile' });
+        next(error);
+    }
 };
 
 // function to get customer profile
@@ -114,9 +215,9 @@ export const getCustomerProfile = async (req, res, next) => {
 
         // Fetch the customer's profile using the user ID
         const customer = await CustomerModel.findOne({ user: userId })
-            .populate('user', 'firstName lastName email phone location publicProfile') // Populate user details
-            .populate('cart') // Optional: Populate cart items 
-            .populate('orderHistory') // Optional: Populate order history 
+            .populate('user') // Populate user details
+            .populate('cart') // Populate cart items 
+            .populate('orderHistory') // Populate order history 
     
         if (!customer) {
             return res.status(404).json({ message: 'Customer profile not found' });
@@ -128,6 +229,46 @@ export const getCustomerProfile = async (req, res, next) => {
         // Handle any errors that occur
         console.error(error);
         res.status(500).json({ message: 'An error occurred while fetching the profile' });
+        next(error);
+    }
+};
+
+// function to update customer profile
+export const updateCustomerProfile = async (req, res, next) => {
+    try {
+        const userId = req.user.id; // Get the user ID from req.user
+        const { preferredPaymentMethod, orderHistory, cart } = req.body;
+
+        // Validate the input using Joi
+        const { error } = customerValidator.validate({ preferredPaymentMethod });
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        // Check if the customer profile exists for this user
+        const customerExists = await CustomerModel.findOne({ user: userId });
+        if (!customerExists) {
+            return res.status(404).json({ message: 'Customer profile not found' });
+        }
+
+        // Prepare the update object
+        const updateData = {
+            preferredPaymentMethod,
+            orderHistory,
+            cart
+        };
+
+        // Update the customer profile
+        const updatedCustomer = await CustomerModel.findOneAndUpdate(
+            { user: userId },
+            { $set: updateData },
+            { new: true, runValidators: true } // Returns the updated document and applies schema validators
+        );
+
+        res.status(200).json(updatedCustomer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while updating the customer profile' });
         next(error);
     }
 };
