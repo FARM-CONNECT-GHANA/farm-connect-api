@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 const farmconnectapp = express();
 expressOasGenerator.handleResponses(farmconnectapp, {
     alwaysServeDocs: true,
-    tags: ['farmerprofile', 'customerprofile'],
+    tags: ['users'],
     mongooseModels: mongoose.modelNames(),
 })
 
@@ -19,7 +19,7 @@ farmconnectapp.use(express.json({ limit: '50mb' }));
 farmconnectapp.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Use Routes
-farmconnectapp.use(userRoutes)
+farmconnectapp.use('/users', userRoutes)
 
 expressOasGenerator.handleRequests();
 farmconnectapp.use((req, res) => res.redirect('/api-docs/'));
