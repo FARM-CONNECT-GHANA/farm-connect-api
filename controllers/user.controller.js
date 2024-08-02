@@ -109,7 +109,7 @@ export const createFarmerProfile = async (req, res, next) => {
             newFarmer });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'An error occurred while creating the farmer profile' });
+        res.status(400).json({ message: 'Provide details to create your profile' });
         next(error);
     }
 };
@@ -239,7 +239,7 @@ export const createCustomerProfile = async (req, res, next) => {
         res.status(201).json(newCustomer);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'An error occurred while creating the customer profile' });
+        res.status(400).json({ message: 'Provide details to create your profile' });
         next(error);
     }
 };
