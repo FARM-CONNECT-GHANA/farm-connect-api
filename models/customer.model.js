@@ -3,7 +3,7 @@ import { toJSON } from "@reis/mongoose-to-json";
 
 const customerSchema = new Schema({
     user: { type: Types.ObjectId, ref: 'User', required: true},
-    prefferedPaymentMethod: { type: String, enum: ['cash', 'Mobile Money', 'Bank Deposit'], required: true},
+    preferredPaymentMethod: { type: String, enum: ['cash', 'Mobile Money', 'Bank Deposit']},
     orderHistory: [{type: Types.ObjectId, ref: 'Order'}],
     cart: [{ type: Types.ObjectId, ref: 'CartItem' }]
 }, {

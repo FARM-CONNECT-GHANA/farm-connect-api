@@ -11,7 +11,7 @@ const cartItemSchema = new Schema({
 
   cartItemSchema.plugin(toJSON)
   
-  export const CartItem = model('CartItem', cartItemSchema);
+  export const CartModel = model('CartItem', cartItemSchema);
 
 
 

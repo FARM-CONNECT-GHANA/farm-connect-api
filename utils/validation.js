@@ -137,14 +137,12 @@ export const notificationValidator = Joi.object({
 
   export const farmerValidator = Joi.object({
     farmName: Joi.string()
-      .required()
       .messages({
         'string.base': 'Farm name must be a string',
         'any.required': 'Farm name is required'
       }),
   
     farmAddress: Joi.string()
-      .required()
       .messages({
         'string.base': 'Farm address must be a string',
         'any.required': 'Farm address is required'
@@ -162,13 +160,14 @@ export const notificationValidator = Joi.object({
       .optional()
       .messages({
         'string.base': 'Bank account details must be a string'
-      })
+      }),
+
+      about: Joi.string()
   });
 
   export const customerValidator = Joi.object({
         preferredPaymentMethod: Joi.string()
           .valid('cash', 'Mobile Money', 'Bank Deposit')
-          .required()
           .messages({
             'string.base': 'Preferred payment method must be a string',
             'any.only': 'Preferred payment method must be one of [cash, Mobile Money, Bank Deposit]',

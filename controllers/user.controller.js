@@ -1,9 +1,12 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { customerValidator, loginValidator, registerValidator } from '../utils/validation.js';
+import { customerValidator, farmerValidator, loginValidator, registerValidator } from '../utils/validation.js';
 import { UserModel } from '../models/user.model.js';
 import { FarmerModel } from '../models/farmer.model.js';
 import { CustomerModel } from '../models/customer.model.js';
+import { ProductModel } from '../models/product.model.js';
+import { CartModel } from '../models/cart.model.js';
+import { OrderModel } from '../models/order.model.js';
 
 // Registration function
 export const register = async (req, res, next) => {
@@ -69,7 +72,7 @@ export const tokenLogin = async (req, res, next) => {
 export const createFarmerProfile = async (req, res, next) => {
     try {
         const user = req.user.id; // Get the user ID from req.user
-        const { farmName, farmAddress, products, farmType, bankAccountDetails, about } = req.body;
+        const { farmName, farmAddress, products, farmType, bankAccountDetails, about} = req.body;
 
         // Validate the input using Joi
         const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails, about });
@@ -83,6 +86,12 @@ export const createFarmerProfile = async (req, res, next) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+          // Handle file uploads
+          let farmPhotos = [];
+          if (req.files && req.files.length > 0) {
+              farmPhotos = req.files.map(file => file.filename); 
+          }
+  
         // Create a new farmer profile
         const newFarmer = await FarmerModel.create({
             user,
@@ -92,7 +101,7 @@ export const createFarmerProfile = async (req, res, next) => {
             farmType,
             bankAccountDetails,
             about,
-            farmPhotos: req.files?.filename
+            farmPhotos
         });
 
         res.status(201).json({ 
@@ -109,7 +118,7 @@ export const createFarmerProfile = async (req, res, next) => {
 export const getFarmerProfile = async (req, res, next) => {
     try {
         const { id } = req.params; // ID from request parameters (for customer view)
-        const userId = req.user.id; // ID of the logged-in user (for farmer's own view)
+        const userId = req.user?.id; // ID of the logged-in user (for farmer's own view)
 
         let farmer;
 
@@ -121,7 +130,7 @@ export const getFarmerProfile = async (req, res, next) => {
         } else {
             // If no ID is provided, the farmer is viewing their own profile
             farmer = await FarmerModel.findOne({ user: userId })
-                .populate('user')
+                .populate('user', '-password')
                 .populate('products');
         }
 
@@ -153,6 +162,14 @@ export const updateFarmerProfile = async (req, res, next) => {
             return res.status(404).json({ message: 'Farmer profile not found' });
         }
 
+        // Handle file uploads
+        let farmPhotos = [];
+        if (req.files && req.files.length > 0) {
+            farmPhotos = req.files.map(file => file.filename); 
+        }
+
+        console.log (req.files)
+
         // Prepare the update object
         const updateData = {
             farmName,
@@ -161,13 +178,17 @@ export const updateFarmerProfile = async (req, res, next) => {
             farmType,
             bankAccountDetails,
             about,
-            farmPhotos: req.files?.filename
         };
+
+        // If new photos are uploaded, update the farmPhotos field
+        if (farmPhotos.length > 0) {
+            updateData.farmPhotos = farmPhotos;
+        }
 
         // Update the farmer profile
         const updatedFarmer = await FarmerModel.findOneAndUpdate(
             { user: userId },
-            { $set: updateData },
+            updateData,
             { new: true, runValidators: true } // Returns the updated document and applies schema validators
         );
 
@@ -221,7 +242,7 @@ export const getCustomerProfile = async (req, res, next) => {
 
         // Fetch the customer's profile using the user ID
         const customer = await CustomerModel.findOne({ user: userId })
-            .populate('user') // Populate user details
+            .populate('user', '-password') // Populate user details
             .populate('cart') // Populate cart items 
             .populate('orderHistory') // Populate order history 
     

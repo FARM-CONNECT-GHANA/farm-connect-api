@@ -11,14 +11,16 @@ userRoutes.post('/login', tokenLogin)
 
 userRoutes.post('/farmerprofile', remoteUpload.array('farmPhotos', 6), authenticated, authorized(['farmer']), createFarmerProfile)
 
-userRoutes.get('/farmerprofile', getFarmerProfile)
+userRoutes.get('/farmerprofile', authenticated, getFarmerProfile)
 
-userRoutes.patch('/farmerprofile/:id', remoteUpload.array('farmPhotos', 6), authenticated, authorized(['farmer']), updateFarmerProfile)
+userRoutes.get('/farmerprofile/:id', getFarmerProfile)
+
+userRoutes.patch('/farmerprofile', remoteUpload.array('farmPhotos', 6), authenticated, authorized(['farmer']), updateFarmerProfile)
 
 userRoutes.post('/customerprofile', authenticated, authorized(['customer']), createCustomerProfile)
 
 userRoutes.get('/customerprofile', authenticated, getCustomerProfile)
 
-userRoutes.patch('/customerprofile/:id', authenticated, authorized(['customer']), updateCustomerProfile)
+userRoutes.patch('/customerprofile', authenticated, authorized(['customer']), updateCustomerProfile)
 
 export default userRoutes
