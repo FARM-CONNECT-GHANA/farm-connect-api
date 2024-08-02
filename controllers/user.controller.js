@@ -148,7 +148,7 @@ export const getFarmerProfile = async (req, res, next) => {
 export const updateFarmerProfile = async (req, res, next) => {
     try {
         const userId = req.user.id; // Get the user ID from req.user
-        const { farmName, farmAddress, products, farmType, bankAccountDetails, about } = req.body;
+        const { farmName, farmAddress, products, farmType, bankAccountDetails, about, email, phone} = req.body;
 
         // Validate the input using Joi
         const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails, about });
@@ -161,6 +161,9 @@ export const updateFarmerProfile = async (req, res, next) => {
         if (!farmerExists) {
             return res.status(404).json({ message: 'Farmer profile not found' });
         }
+
+      // Retrieve User Instance
+      const user = await UserModel.findById(userId);
 
         // Handle file uploads
         let farmPhotos = [];
@@ -189,8 +192,15 @@ export const updateFarmerProfile = async (req, res, next) => {
         const updatedFarmer = await FarmerModel.findOneAndUpdate(
             { user: userId },
             updateData,
-            { new: true, runValidators: true } // Returns the updated document and applies schema validators
+            { new: true, runValidators: true, populate: { path: 'user', select: '-password' } } // Returns the updated document and applies schema validators
         );
+
+     // Update user data 
+    //   if (firstName) user.firstName = firstName;
+    //   if (lastName) user.lastName = lastName;
+      if (email) user.email = email;
+      if (phone) user.phone = phone;
+      await user.save(); // Persist user changes
 
         res.status(200).json({ message: 'Update successful', updatedFarmer });
     } catch (error) {
@@ -263,39 +273,52 @@ export const getCustomerProfile = async (req, res, next) => {
 // function to update customer profile
 export const updateCustomerProfile = async (req, res, next) => {
     try {
-        const userId = req.user.id; // Get the user ID from req.user
-        const { preferredPaymentMethod, orderHistory, cart } = req.body;
-
-        // Validate the input using Joi
-        const { error } = customerValidator.validate({ preferredPaymentMethod });
-        if (error) {
-            return res.status(400).json({ message: error.details[0].message });
-        }
-
-        // Check if the customer profile exists for this user
-        const customerExists = await CustomerModel.findOne({ user: userId });
-        if (!customerExists) {
-            return res.status(404).json({ message: 'Customer profile not found' });
-        }
-
-        // Prepare the update object
-        const updateData = {
-            preferredPaymentMethod,
-            orderHistory,
-            cart
-        };
-
-        // Update the customer profile
-        const updatedCustomer = await CustomerModel.findOneAndUpdate(
-            { user: userId },
-            { $set: updateData },
-            { new: true, runValidators: true } // Returns the updated document and applies schema validators
-        );
-
-        res.status(200).json(updatedCustomer);
+      const userId = req.user.id;
+      const { preferredPaymentMethod, orderHistory, cart, email, phone } = req.body; 
+  
+      // Validate the input using Joi
+      const { error } = customerValidator.validate({ preferredPaymentMethod });
+      if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+      }
+  
+      // Check if the customer profile exists for this user
+      const customerExists = await CustomerModel.findOne({ user: userId });
+      if (!customerExists) {
+        return res.status(404).json({ message: 'Customer profile not found' });
+      }
+  
+      // Retrieve User Instance
+      const user = await UserModel.findById(userId);
+  
+      // Prepare the update object (for customer data)
+      const updateData = {
+        preferredPaymentMethod,
+        orderHistory,
+        cart,
+      };
+  
+      // Update the customer profile
+      const updatedCustomer = await CustomerModel.findOneAndUpdate(
+        { user: userId },
+        { $set: updateData },
+        { new: true, runValidators: true, populate: { path: 'user', select: '-password' } }
+      );
+  
+      // Update user data 
+    //   if (firstName) user.firstName = firstName;
+    //   if (lastName) user.lastName = lastName;
+      if (email) user.email = email;
+      if (phone) user.phone = phone;
+  
+    await user.save(); // Wait for user update to complete before sending response
+  
+      res.status(200).json(updatedCustomer);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred while updating the customer profile' });
-        next(error);
+      console.error(error);
+      res.status(500).json({ message: 'An error occurred while updating the customer profile' });
+      next(error);
     }
-};
+  };
+  
+  
