@@ -31,7 +31,7 @@ export const register = async (req, res, next) => {
 export const tokenLogin = async (req, res, next) => {
     try {
       // Validate request
-      const { value, error } = loginValidator.validate(req.body);
+      const { error } = loginValidator.validate(req.body);
       if (error) {
         return res.status(422).json({ message: error.details[0].message });
       }
@@ -69,10 +69,10 @@ export const tokenLogin = async (req, res, next) => {
 export const createFarmerProfile = async (req, res, next) => {
     try {
         const user = req.user.id; // Get the user ID from req.user
-        const { farmName, farmAddress, products, farmType, bankAccountDetails } = req.body;
+        const { farmName, farmAddress, products, farmType, bankAccountDetails, about } = req.body;
 
         // Validate the input using Joi
-        const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails });
+        const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails, about });
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
         }
@@ -90,10 +90,14 @@ export const createFarmerProfile = async (req, res, next) => {
             farmAddress,
             products,
             farmType,
-            bankAccountDetails
+            bankAccountDetails,
+            about,
+            farmPhotos: req.files?.filename
         });
 
-        res.status(201).json(newFarmer);
+        res.status(201).json({ 
+            message: 'Profile created',
+            newFarmer });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred while creating the farmer profile' });
@@ -112,7 +116,7 @@ export const getFarmerProfile = async (req, res, next) => {
         if (id) {
             // If ID is provided in the request params, customer is viewing the farmer's profile
             farmer = await FarmerModel.findById(id)
-                .populate('user', 'firstName lastName email phone location publicProfile')
+                .populate('user', 'firstName lastName email phone location')
                 .populate('products');
         } else {
             // If no ID is provided, the farmer is viewing their own profile
@@ -135,10 +139,10 @@ export const getFarmerProfile = async (req, res, next) => {
 export const updateFarmerProfile = async (req, res, next) => {
     try {
         const userId = req.user.id; // Get the user ID from req.user
-        const { farmName, farmAddress, products, farmType, bankAccountDetails } = req.body;
+        const { farmName, farmAddress, products, farmType, bankAccountDetails, about } = req.body;
 
         // Validate the input using Joi
-        const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails });
+        const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails, about });
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
         }
@@ -155,7 +159,9 @@ export const updateFarmerProfile = async (req, res, next) => {
             farmAddress,
             products,
             farmType,
-            bankAccountDetails
+            bankAccountDetails,
+            about,
+            farmPhotos: req.files?.filename
         };
 
         // Update the farmer profile
@@ -165,7 +171,7 @@ export const updateFarmerProfile = async (req, res, next) => {
             { new: true, runValidators: true } // Returns the updated document and applies schema validators
         );
 
-        res.status(200).json(updatedFarmer);
+        res.status(200).json({ message: 'Update successful', updatedFarmer });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred while updating the farmer profile' });

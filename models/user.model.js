@@ -8,12 +8,7 @@ const userSchema = new Schema({
     password: {type: String, required: true},
     phone: {type: String, required: true},
     role: {type: String, enum: ['farmer', 'customer'], required: true},
-    location: { type: { type: String, enum: ['Point'] }, coordinates: [Number] },
-    publicProfile: {
-      bio: { type: String },
-      profilePicture: { type: String },
-      contactNumber: { type: String }
-    }
+    location: { type: { type: String, enum: ['Point'] }, coordinates: [Number] }
 }, {
     timestamps: true
 })

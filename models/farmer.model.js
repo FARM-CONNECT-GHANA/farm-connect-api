@@ -7,7 +7,9 @@ const farmerSchema = new Schema({
         farmAddress: { type: String, required: true },
         products: [{ type: Types.ObjectId, ref: 'Product' }],
         farmType: {type: String, enum: ['organic', 'conventional']},
-        bankAccountDetails: {type: String}
+        bankAccountDetails: {type: String},
+        about: { type: String },
+        farmPhotos: [{ type: String }]
 }, {
     timestamps: true
 })

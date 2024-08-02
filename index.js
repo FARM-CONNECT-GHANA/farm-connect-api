@@ -9,7 +9,7 @@ const farmconnectapp = express();
 // Apply middleware
 farmconnectapp.use(cors({credentials: true, origin: '*'}));
 farmconnectapp.use(express.json());
-farmconnectapp.use('/users', userRoutes)
+farmconnectapp.use(userRoutes)
 
 
 // Listen for incoming requests

@@ -1,10 +1,24 @@
 import { Router } from "express";
-import { register, tokenLogin } from "../controllers/user.controller.js";
+import { createCustomerProfile, createFarmerProfile, getCustomerProfile, getFarmerProfile, register, tokenLogin, updateCustomerProfile, updateFarmerProfile } from "../controllers/user.controller.js";
+import { remoteUpload } from "../middlewares/upload.js";
+import { authenticated, authorized } from "../middlewares/auth.middleware.js";
 
 const userRoutes = Router();
 
 userRoutes.post('/register', register)
 
 userRoutes.post('/login', tokenLogin)
+
+userRoutes.post('/farmerprofile', remoteUpload.array('farmPhotos', 6), authenticated, authorized(['farmer']), createFarmerProfile)
+
+userRoutes.get('/farmerprofile', getFarmerProfile)
+
+userRoutes.patch('/farmerprofile/:id', remoteUpload.array('farmPhotos', 6), authenticated, authorized(['farmer']), updateFarmerProfile)
+
+userRoutes.post('/customerprofile', authenticated, authorized(['customer']), createCustomerProfile)
+
+userRoutes.get('/customerprofile', authenticated, getCustomerProfile)
+
+userRoutes.patch('/customerprofile/:id', authenticated, authorized(['customer']), updateCustomerProfile)
 
 export default userRoutes
