@@ -34,6 +34,12 @@ export const productValidator = Joi.object({
     stock: Joi.number().required(),  
 })
 
+export const productUpdateValidator = Joi.object({
+    name:Joi.string(),
+    price: Joi.number(),
+    stock: Joi.number(),  
+})
+
 export const orderItemValidator = Joi.object({
     price: Joi.number().required(),
     quantity: Joi.number().required(), 
@@ -137,6 +143,35 @@ export const notificationValidator = Joi.object({
 
   export const farmerValidator = Joi.object({
     farmName: Joi.string().required()
+      .messages({
+        'string.base': 'Farm name must be a string'
+      }),
+  
+    farmAddress: Joi.string()
+      .messages({
+        'string.base': 'Farm address must be a string',
+        'any.required': 'Farm address is required'
+      }),
+  
+    farmType: Joi.string()
+      .valid('organic', 'conventional')
+      .optional()
+      .messages({
+        'string.base': 'Farm type must be a string',
+        'any.only': 'Farm type must be one of [organic, conventional]'
+      }),
+  
+    bankAccountDetails: Joi.string()
+      .optional()
+      .messages({
+        'string.base': 'Bank account details must be a string'
+      }),
+
+      about: Joi.string()
+  });
+
+  export const updateFarmerValidator = Joi.object({
+    farmName: Joi.string()
       .messages({
         'string.base': 'Farm name must be a string'
       }),

@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { customerValidator, farmerValidator, loginValidator, registerValidator } from '../utils/validation.js';
+import { customerValidator, farmerValidator, loginValidator, registerValidator, updateFarmerValidator } from '../utils/validation.js';
 import { UserModel } from '../models/user.model.js';
 import { FarmerModel } from '../models/farmer.model.js';
 import { CustomerModel } from '../models/customer.model.js';
@@ -151,7 +151,7 @@ export const updateFarmerProfile = async (req, res, next) => {
         const { farmName, farmAddress, products, farmType, bankAccountDetails, about, email, phone} = req.body;
 
         // Validate the input using Joi
-        const { error } = farmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails, about });
+        const { error } = updateFarmerValidator.validate({ farmName, farmAddress, farmType, bankAccountDetails, about });
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
         }
