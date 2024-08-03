@@ -91,7 +91,13 @@ export const createFarmerProfile = async (req, res, next) => {
           if (req.files && req.files.length > 0) {
               farmPhotos = req.files.map(file => file.filename); 
           }
-  
+          
+
+    // Check if a farmer profile already exists for the user
+    const existingProfile = await FarmerModel.findOne({ user });
+    if (existingProfile) {
+      return res.status(400).json({ message: 'Farmer profile already exists' });
+    }
         // Create a new farmer profile
         const newFarmer = await FarmerModel.create({
             user,
@@ -109,7 +115,7 @@ export const createFarmerProfile = async (req, res, next) => {
             newFarmer });
     } catch (error) {
         console.error(error);
-        res.status(400).json({ message: 'Provide details to create your profile' });
+        res.status(500).json({ message: 'An error occurred while creating the profile' });
         next(error);
     }
 };
@@ -227,6 +233,12 @@ export const createCustomerProfile = async (req, res, next) => {
         if (!userExists) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        // Check if a customer profile already exists for the user
+    const existingProfile = await CustomerModel.findOne({ user });
+    if (existingProfile) {
+      return res.status(400).json({ message: 'Customer profile already exists' });
+    }
 
         // Create a new customer profile
         const newCustomer = await CustomerModel.create({
