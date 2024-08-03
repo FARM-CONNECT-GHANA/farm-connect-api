@@ -3,7 +3,7 @@ import { toJSON } from "@reis/mongoose-to-json";
 
 const farmerSchema = new Schema({
         user: { type: Types.ObjectId, ref: 'User', required: true },
-        farmName: { type: String},
+        farmName: { type: String, required: true},
         farmAddress: { type: String},
         products: [{ type: Types.ObjectId, ref: 'Product' }],
         farmType: {type: String, enum: ['organic', 'conventional']},

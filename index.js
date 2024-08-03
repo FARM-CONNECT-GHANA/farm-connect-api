@@ -4,12 +4,13 @@ import expressOasGenerator from '@mickeymond/express-oas-generator';
 import { dbConnection } from "./config/db.js";
 import userRoutes from "./routes/user.routes.js";
 import mongoose from "mongoose";
+import productRoutes from "./routes/products.routes.js";
 
 // create express app
 const farmconnectapp = express();
 expressOasGenerator.handleResponses(farmconnectapp, {
     alwaysServeDocs: true,
-    tags: ['users'],
+    tags: ['users', 'products'],
     mongooseModels: mongoose.modelNames(),
 })
 
@@ -20,6 +21,7 @@ farmconnectapp.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Use Routes
 farmconnectapp.use('/users', userRoutes)
+farmconnectapp.use(productRoutes)
 
 expressOasGenerator.handleRequests();
 farmconnectapp.use((req, res) => res.redirect('/api-docs/'));

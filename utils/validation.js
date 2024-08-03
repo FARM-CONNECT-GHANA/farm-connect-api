@@ -136,7 +136,7 @@ export const notificationValidator = Joi.object({
   });
 
   export const farmerValidator = Joi.object({
-    farmName: Joi.string()
+    farmName: Joi.string().required()
       .messages({
         'string.base': 'Farm name must be a string'
       }),
