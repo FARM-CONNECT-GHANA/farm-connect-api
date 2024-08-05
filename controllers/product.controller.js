@@ -105,6 +105,66 @@ export const getAllProducts = async (req, res, next) => {
 };
   
 
+// function to get all products with search functionality and category as a string field within product model
+// export const getAllProducts = async (req, res, next) => {
+//     try {
+//         const {
+//             keyword,
+//             category,
+//             minPrice,
+//             maxPrice,
+//             sortBy = 'createdAt',
+//             sort = 'desc',
+//             page = 1,
+//             limit = 10
+//         } = req.query;
+
+//         let searchQuery = {};
+
+//         // Search by name, description, or category if category is a string field
+//         if (keyword) {
+//             searchQuery.$or = [
+//                 { name: { $regex: keyword, $options: 'i' } },
+//                 { description: { $regex: keyword, $options: 'i' } },
+//                 { category: { $regex: keyword, $options: 'i' } } // Adjusted for embedded category
+//             ];
+//         }
+
+//         // Filter by category (assuming category is a string field)
+//         if (category) {
+//             searchQuery.category = category;
+//         }
+
+//         // Filter by price range
+//         if (minPrice) {
+//             searchQuery.price = { $gte: minPrice };
+//         }
+//         if (maxPrice) {
+//             searchQuery.price = { ...searchQuery.price, $lte: maxPrice };
+//         }
+
+//         // Sorting
+//         const sortOrder = sort === 'asc' ? 1 : -1;
+//         let query = ProductModel.find(searchQuery)
+//             .sort({ [sortBy]: sortOrder });
+
+//         // Pagination
+//         const skip = (page - 1) * limit;
+//         query = query.skip(skip).limit(limit);
+
+//         // Execute the query to get products
+//         const products = await query;
+
+//         res.status(200).json({ products });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'An error occurred while fetching products' });
+//         next(error);
+//     }
+// };
+
+
+
 // function to get one product
 export const getProductById = async (req, res, next) => {
     try {

@@ -3,13 +3,13 @@ import { toJSON } from '@reis/mongoose-to-json';
 
 const notificationSchema = new Schema({
   user: { type: Types.ObjectId, ref: 'User', required: true }, // User who receives the notification
-  message: { type: Types.ObjectId, ref: 'Message' }, // Reference to Message (optional)
-  notificationContent: { type: String, required: true }, // Content of the notification
-  read: { type: Boolean, default: false }, // Read status of the notification
+  chatMessage: { type: Types.ObjectId, ref: 'Message' }, // Reference to Message (optional)
+  message: { type: String, required: true }, // Content of the notification
+  isRead: { type: Boolean, default: false }
 },{
     timestamps: true
 });
 
 notificationSchema.plugin(toJSON)
 
-export const Notification = model('Notification', notificationSchema);
+export const NotificationModel = model('Notification', notificationSchema);
