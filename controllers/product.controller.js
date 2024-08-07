@@ -45,116 +45,57 @@ export const createProduct = async (req, res, next) => {
 
 
 // function to get all products with searching, filtering, sorting, pagination
-export const getAllProducts = async (req, res, next) => {
-    try {
-        // Extract query parameters for searching, filtering, sorting, and pagination
-        const {
-            keyword,
-            category,
-            minPrice,
-            maxPrice,
-            sortBy = 'createdAt', // Default sorting by creation date
-            sort = 'desc', // Default sort order
-            page = 1,
-            limit = 10
-        } = req.query;
-
-        // Initialize the search query object
-        let searchQuery = {};
-
-        // Search by keyword in name or description
-        if (keyword) {
-            searchQuery.$or = [
-                { name: { $regex: keyword, $options: 'i' } }, // Case-insensitive search in name
-                { description: { $regex: keyword, $options: 'i' } } // Case-insensitive search in description
-            ];
-        }
-
-        // Filter by category
-        if (category) {
-            searchQuery.category = category;
-        }
-
-        // Filter by price range
-        if (minPrice || maxPrice) {
-            searchQuery.price = {};
-            if (minPrice) searchQuery.price.$gte = minPrice; // Greater than or equal to minPrice
-            if (maxPrice) searchQuery.price.$lte = maxPrice; // Less than or equal to maxPrice
-        }
-
-        // Sorting
-        const sortOrder = sort === 'asc' ? 1 : -1;
-        let query = ProductModel.find(searchQuery)
-            .sort({ [sortBy]: sortOrder }) // Sort by the specified field and order
-            .populate('category', 'name'); // Populate category name
-
-        // Pagination
-        const skip = (page - 1) * limit;
-        query = query.skip(skip).limit(limit); // Apply pagination
-
-        // Execute the query to get products
-        const products = await query;
-
-        // Return the products
-        res.status(200).json({ products });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred while fetching products' });
-        next(error);
-    }
-};
-  
-
-// function to get all products with search functionality and category as a string field within product model
 // export const getAllProducts = async (req, res, next) => {
 //     try {
+//         // Extract query parameters for searching, filtering, sorting, and pagination
 //         const {
 //             keyword,
 //             category,
 //             minPrice,
 //             maxPrice,
-//             sortBy = 'createdAt',
-//             sort = 'desc',
+//             sortBy = 'createdAt', // Default sorting by creation date
+//             sort = 'desc', // Default sort order
 //             page = 1,
 //             limit = 10
 //         } = req.query;
 
+//         // Initialize the search query object
 //         let searchQuery = {};
 
-//         // Search by name, description, or category if category is a string field
+//         // Search by keyword in name or description
 //         if (keyword) {
 //             searchQuery.$or = [
-//                 { name: { $regex: keyword, $options: 'i' } },
-//                 { description: { $regex: keyword, $options: 'i' } },
-//                 { category: { $regex: keyword, $options: 'i' } } // Adjusted for embedded category
+//                 { name: { $regex: keyword, $options: 'i' } }, // Case-insensitive search in name
+//                 { description: { $regex: keyword, $options: 'i' } } // Case-insensitive search in description
 //             ];
 //         }
 
-//         // Filter by category (assuming category is a string field)
+//         // Filter by category
 //         if (category) {
 //             searchQuery.category = category;
 //         }
 
 //         // Filter by price range
-//         if (minPrice) {
-//             searchQuery.price = { $gte: minPrice };
-//         }
-//         if (maxPrice) {
-//             searchQuery.price = { ...searchQuery.price, $lte: maxPrice };
+//         if (minPrice || maxPrice) {
+//             searchQuery.price = {};
+//             if (minPrice) searchQuery.price.$gte = minPrice; // Greater than or equal to minPrice
+//             if (maxPrice) searchQuery.price.$lte = maxPrice; // Less than or equal to maxPrice
 //         }
 
 //         // Sorting
 //         const sortOrder = sort === 'asc' ? 1 : -1;
 //         let query = ProductModel.find(searchQuery)
-//             .sort({ [sortBy]: sortOrder });
+//             .sort({ [sortBy]: sortOrder }) // Sort by the specified field and order
+//             .populate('category', 'name'); // Populate category name
 
 //         // Pagination
 //         const skip = (page - 1) * limit;
-//         query = query.skip(skip).limit(limit);
+//         query = query.skip(skip).limit(limit); // Apply pagination
 
 //         // Execute the query to get products
 //         const products = await query;
 
+//         // Return the products
 //         res.status(200).json({ products });
 //     } catch (error) {
 //         console.error(error);
@@ -162,7 +103,78 @@ export const getAllProducts = async (req, res, next) => {
 //         next(error);
 //     }
 // };
+  
 
+// function to get all products with search functionality and category as a string field within product model
+export const getAllProducts = async (req, res, next) => {
+    try {
+        const {
+            keyword = '',
+            category,
+            minPrice,
+            maxPrice,
+            sortBy = 'createdAt',
+            sort = 'desc',
+            page = 1,
+            limit = 10
+        } = req.query;
+
+        let searchQuery = {};
+
+        // Convert `minPrice` and `maxPrice` to numbers
+        const minPriceNum = Number(minPrice);
+        const maxPriceNum = Number(maxPrice);
+
+        // Search by name, description, or category if keyword is provided
+        if (keyword) {
+            searchQuery.$or = [
+                { name: { $regex: keyword, $options: 'i' } },
+                { description: { $regex: keyword, $options: 'i' } },
+                { category: { $regex: keyword, $options: 'i' } }
+            ];
+        }
+
+        // Filter by category 
+        if (category) {
+            searchQuery.category = category;
+        }
+
+        // Filter by price range
+        if (!isNaN(minPriceNum)) {
+            searchQuery.price = { ...searchQuery.price, $gte: minPriceNum };
+        }
+        if (!isNaN(maxPriceNum)) {
+            searchQuery.price = { ...searchQuery.price, $lte: maxPriceNum };
+        }
+
+        // Sorting
+        const sortOrder = sort === 'asc' ? 1 : -1;
+        const validSortFields = ['name', 'price', 'createdAt']; 
+        if (!validSortFields.includes(sortBy)) {
+            return res.status(400).json({ message: 'Invalid sort field' });
+        }
+
+        let query = ProductModel.find(searchQuery)
+        // .populate({
+        //     path: 'farmer',
+        //     select: 'farmName' // Only include the farmName field from the Farmer model
+        // })
+            .sort({ [sortBy]: sortOrder });
+
+        // Pagination
+        const skip = (Number(page) - 1) * Number(limit);
+        query = query.skip(skip).limit(Number(limit));
+
+        // Execute the query to get products
+        const products = await query;
+
+        res.status(200).json({ products });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while fetching products' });
+        next(error);
+    }
+};
 
 
 // function to get one product
@@ -172,7 +184,7 @@ export const getProductById = async (req, res, next) => {
 
         const product = await ProductModel.findById(id)
             // .populate('farmer', 'farmName') 
-            .select('-farmer')
+            // .select('-farmer')
             .populate('category', 'name');
 
             console.log('Farmer ID:', product.farmer);

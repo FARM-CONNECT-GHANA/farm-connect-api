@@ -24,7 +24,7 @@ export const userValidator = Joi.object({
 });
 
 export const  reviewValidator = Joi.object({
-    targetType: Joi.string().required().valid('product', 'farmer'),
+    targetType: Joi.string().required().valid('product', 'farmer', 'customer'),
     rating: Joi.number().required().min(1).max(5)
 })
 
@@ -32,6 +32,8 @@ export const productValidator = Joi.object({
     name:Joi.string().required(),
     price: Joi.number().required(),
     stock: Joi.number().required(),  
+    category: Joi.string().valid('Fruits', 'Vegetables', 'Roots & Tubers', 'Cereals & Grains', 'Legumes', 'Herbs & Spices', 
+        'Nuts & Seeds', 'Animal Products', 'Dairy Products', 'Processed Foods', 'Others')
 })
 
 export const productUpdateValidator = Joi.object({
@@ -46,7 +48,7 @@ export const orderItemValidator = Joi.object({
 })
 
 export const orderValidator = Joi.object({
-    totalAmount: Joi.number().required(), 
+    // totalAmount: Joi.number().required(), 
     orderStatus: Joi.string().valid('pending','shipped', 'delivered', 'canceled').default('pending'),
     deliveryAddress: Joi.object({
         addressLine1: Joi.string()
@@ -104,7 +106,7 @@ export const notificationValidator = Joi.object({
 
   export const messageValidator = Joi.object({
     messageContent: Joi.string()
-      .optional()
+      .required()
       .messages({
         'string.base': 'Message content must be a string'
       }),
@@ -113,17 +115,9 @@ export const notificationValidator = Joi.object({
       .default(false)
       .messages({
         'boolean.base': 'Read status must be a boolean'
-      }),
-  
-    messageType: Joi.string()
-      .valid('text', 'image', 'file')
-      .required()
-      .messages({
-        'string.base': 'Message type must be a string',
-        'any.only': 'Message type must be one of text, image, file',
-        'any.required': 'Message type is required'
       })
   });
+
 
   export const feedbackValidator = Joi.object({
     subject: Joi.string()

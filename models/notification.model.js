@@ -3,7 +3,7 @@ import { toJSON } from '@reis/mongoose-to-json';
 
 const notificationSchema = new Schema({
   user: { type: Types.ObjectId, ref: 'User', required: true }, // User who receives the notification
-  chatMessage: { type: Types.ObjectId, ref: 'Message' }, // Reference to Message (optional)
+  type: { type: String, enum: ['Order Placement', 'Order Status Update', 'Order Canceled', 'Message'], required: true }, // Type of notification
   message: { type: String, required: true }, // Content of the notification
   isRead: { type: Boolean, default: false }
 },{

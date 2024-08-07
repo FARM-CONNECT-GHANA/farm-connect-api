@@ -1,13 +1,13 @@
-import { model, Schema } from "mongoose";
-import { toJSON } from "@reis/mongoose-to-json";
+// import { model, Schema } from "mongoose";
+// import { toJSON } from "@reis/mongoose-to-json";
 
-const categorySchema = new Schema ({
-    name: { type: String, required: true },
-    description: { type: String }
-}, {
-    timestamps: true
-})
+// const categorySchema = new Schema ({
+//     name: { type: String, required: true },
+//     description: { type: String }
+// }, {
+//     timestamps: true
+// })
 
-categorySchema.plugin(toJSON)
+// categorySchema.plugin(toJSON)
 
-export const CategoryModel = model('Category', categorySchema)
+// export const CategoryModel = model('Category', categorySchema)

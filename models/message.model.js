@@ -6,9 +6,8 @@ export const messageSchema = new Schema ({
     messageId: {type: Number, required: true, unique: true},
     sender: {type: Types.ObjectId, ref: 'User', required: true},
     recipient: {type: Types.ObjectId, ref: 'User', required: true},
-    messageContent: {type: String},
+    messageContent: {type: String, required: true},
     readStatus: {type: Boolean, default: false},
-    messageType: {type: String, enum: ['text', 'image', 'file'], required: true},
     timestamp: {type: Date, default: Date.now, required: true}
 }, {
     timestamps: true
