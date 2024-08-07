@@ -51,6 +51,11 @@ farmconnectapp.use(updateOrderRoute);
 farmconnectapp.use(messageRoutes);
 farmconnectapp.use(feedbackRoute);
 
+// Redirect root path to /api-docs
+farmconnectapp.get('/', (req, res) => {
+    res.redirect('/api-docs');
+  });
+
 // Setup Swagger UI
 farmconnectapp.use('/api-docs', swaggerDocs, swaggerUiSetup);
 

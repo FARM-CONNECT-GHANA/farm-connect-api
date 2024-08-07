@@ -11,8 +11,8 @@ const swaggerDefinition = {
   },
   servers: [
     {
-        url: process.env.RENDER_URL || `http://localhost:${process.env.PORT || 8090}`,
-        description: 'API server',
+      url: `http://localhost:${process.env.PORT || 8090}`,
+      description: 'API server',
     },
   ],
   components: {
@@ -36,7 +36,7 @@ const options = {
   definition: swaggerDefinition,
   apis: [
     './routes/user.routes.js', // Path to user routes file
-    './routes/products.routes.js', // Path to product routes file
+    './routes/product.routes.js', // Path to product routes file
     './routes/order.routes.js', // Path to order routes file
     './routes/cart.routes.js', // Path to cart routes file
     './routes/notification.routes.js' // Path to notification routes file
