@@ -39,6 +39,7 @@ const options = {
     './routes/products.routes.js', // Path to product routes file
     './routes/cart.routes.js', // Path to cart routes file
     './routes/order.routes.js', // Path to order routes file
+    './routes/subOrder.routes.js', // Path to suborder routes file
     './routes/notification.routes.js' // Path to notification routes file
   ],
 };

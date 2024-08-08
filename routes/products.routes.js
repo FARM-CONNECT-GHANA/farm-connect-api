@@ -152,7 +152,7 @@ productRoutes.post("/products", remoteUpload.array("images", 6), authenticated, 
  * @openapi
  * /products:
  *   get:
- *     summary: Retrieve all products
+ *     summary: Retrieve all products, search by category, name, description, minPrice,maxPrice, sort in ascending or descending order
  *     description: This endpoint allows users to retrieve a list of all products.
  *     tags:
  *       - Products
