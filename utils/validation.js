@@ -196,6 +196,7 @@ export const notificationValidator = Joi.object({
   export const customerValidator = Joi.object({
         preferredPaymentMethod: Joi.string()
           .valid('cash', 'Mobile Money', 'Bank Deposit')
+          .required()
           .messages({
             'string.base': 'Preferred payment method must be a string',
             'any.only': 'Preferred payment method must be one of [cash, Mobile Money, Bank Deposit]',

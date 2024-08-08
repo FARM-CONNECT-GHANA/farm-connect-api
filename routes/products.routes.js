@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticated, authorized } from "../middlewares/auth.middleware.js";
-import {createProduct, deleteProduct, getAllProducts, getProductById, updateProduct} from "../controllers/product.controller.js";
+import {createProduct, deleteProduct, getAllProducts, getFarmerProducts, getProductById, updateProduct} from "../controllers/product.controller.js";
 import { remoteUpload } from "../middlewares/upload.js";
 
 const productRoutes = Router();
@@ -208,6 +208,98 @@ productRoutes.get("/products", getAllProducts);
 
 /**
  * @openapi
+ * /products/farmer:
+ *   get:
+ *     summary: Retrieve products for the logged-in farmer
+ *     description: Fetches all products associated with the farmer who is currently logged in.
+ *     tags:
+ *       - Products
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of products associated with the farmer
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     example: "60c72b2f9b1e8b001a5c1f24"
+ *                   name:
+ *                     type: string
+ *                     example: "Organic Apples"
+ *                   description:
+ *                     type: string
+ *                     example: "Freshly picked organic apples from our farm."
+ *                   price:
+ *                     type: number
+ *                     format: float
+ *                     example: 3.99
+ *                   farmer:
+ *                     type: string
+ *                     example: "60c72b2f9b1e8b001a5c1f23"
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2024-08-08T12:34:56Z"
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2024-08-08T12:34:56Z"
+ *       401:
+ *         description: Unauthorized, if the user is not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       403:
+ *         description: Forbidden, if the user does not have the 'farmer' role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden, insufficient permissions"
+ *       404:
+ *         description: Farmer not found for the logged-in user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Farmer not found for this user."
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while retrieving the products."
+ *     securitySchemes:
+ *       bearerAuth:
+ *         type: http
+ *         scheme: bearer
+ *         bearerFormat: JWT
+ */
+productRoutes.get("/products/farmer", authenticated, authorized(['farmer']), getFarmerProducts);
+
+/**
+ * @openapi
  * /products/{id}:
  *   get:
  *     summary: Retrieve a product by ID
@@ -279,6 +371,7 @@ productRoutes.get("/products", getAllProducts);
  *                   example: "An error occurred while retrieving the product."
  */
 productRoutes.get("/products/:id", getProductById);
+
 
 /**
  * @openapi

@@ -29,6 +29,8 @@ const io = new Server(server, {
     }
 });
 
+farmconnectapp.set('io', io);
+
 // Middleware for Socket.IO
 farmconnectapp.use((req, res, next) => {
     req.io = io;

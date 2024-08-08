@@ -54,7 +54,7 @@ export const tokenLogin = async (req, res, next) => {
       }
   
       // Create token
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '72h' });
   
       // Return response
       res.status(200).json({
@@ -266,7 +266,6 @@ export const getCustomerProfile = async (req, res, next) => {
         const customer = await CustomerModel.findOne({ user: userId })
             .populate('user', '-password') // Populate user details
             .populate('cart') // Populate cart items 
-            .populate('orderHistory') // Populate order history 
     
         if (!customer) {
             return res.status(404).json({ message: 'Customer profile not found' });
@@ -286,7 +285,7 @@ export const getCustomerProfile = async (req, res, next) => {
 export const updateCustomerProfile = async (req, res, next) => {
     try {
       const userId = req.user.id;
-      const { preferredPaymentMethod, orderHistory, cart, email, phone } = req.body; 
+      const { preferredPaymentMethod, cart, email, phone } = req.body; 
   
       // Validate the input using Joi
       const { error } = customerValidator.validate({ preferredPaymentMethod });
@@ -306,7 +305,6 @@ export const updateCustomerProfile = async (req, res, next) => {
       // Prepare the update object (for customer data)
       const updateData = {
         preferredPaymentMethod,
-        orderHistory,
         cart,
       };
   

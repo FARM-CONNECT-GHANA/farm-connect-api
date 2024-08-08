@@ -4,8 +4,7 @@ const subOrderSchema = new Schema({
     farmer: { type: Types.ObjectId, ref: 'Farmer', required: true },
     products: [{ type: Types.ObjectId, ref: 'OrderItem', required: true }],
     totalAmount: { type: Number, required: true },
-    orderStatus: { type: String, enum: ['pending', 'shipped', 'delivered', 'canceled'], default: 'pending' },
-    mainOrder: { type: Types.ObjectId, ref: 'Order' },
+    orderStatus: { type: String, enum: ['pending', 'shipped', 'delivered', 'canceled'], default: 'pending' }
 }, {
     timestamps: true
 });

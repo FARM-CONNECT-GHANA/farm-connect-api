@@ -1,12 +1,27 @@
 import {ProductModel} from '../models/product.model.js'; 
 import { productUpdateValidator, productValidator } from '../utils/validation.js';
 import { FarmerModel } from '../models/farmer.model.js';
+import mongoose from 'mongoose';
 
-// function to add product
+
+
 export const createProduct = async (req, res, next) => {
     try {
-        const farmer = req.user.id; 
-        console.log('Creating product for Farmer ID:', farmer); // Debugging output
+        const userId = req.user.id;
+
+        // Check if the userId is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        // Find the corresponding farmer using the userId
+        const farmer = await FarmerModel.findOne({ user: userId }).exec();
+
+        if (!farmer) {
+            return res.status(404).json({ message: 'Farmer not found' });
+        }
+
+        console.log('Creating product for Farmer ID:', farmer._id); // Debugging output
 
         const { name, description, price, category, stock } = req.body;
 
@@ -19,12 +34,12 @@ export const createProduct = async (req, res, next) => {
         // Handle file uploads
         let images = [];
         if (req.files && req.files.length > 0) {
-            images = req.files.map(file => file.filename); 
+            images = req.files.map(file => file.filename);
         }
 
         // Create a new product
         const newProduct = await ProductModel.create({
-            farmer,
+            farmer: farmer._id, // Use the farmer's ObjectId
             name,
             description,
             price,
@@ -44,66 +59,6 @@ export const createProduct = async (req, res, next) => {
 };
 
 
-// function to get all products with searching, filtering, sorting, pagination
-// export const getAllProducts = async (req, res, next) => {
-//     try {
-//         // Extract query parameters for searching, filtering, sorting, and pagination
-//         const {
-//             keyword,
-//             category,
-//             minPrice,
-//             maxPrice,
-//             sortBy = 'createdAt', // Default sorting by creation date
-//             sort = 'desc', // Default sort order
-//             page = 1,
-//             limit = 10
-//         } = req.query;
-
-//         // Initialize the search query object
-//         let searchQuery = {};
-
-//         // Search by keyword in name or description
-//         if (keyword) {
-//             searchQuery.$or = [
-//                 { name: { $regex: keyword, $options: 'i' } }, // Case-insensitive search in name
-//                 { description: { $regex: keyword, $options: 'i' } } // Case-insensitive search in description
-//             ];
-//         }
-
-//         // Filter by category
-//         if (category) {
-//             searchQuery.category = category;
-//         }
-
-//         // Filter by price range
-//         if (minPrice || maxPrice) {
-//             searchQuery.price = {};
-//             if (minPrice) searchQuery.price.$gte = minPrice; // Greater than or equal to minPrice
-//             if (maxPrice) searchQuery.price.$lte = maxPrice; // Less than or equal to maxPrice
-//         }
-
-//         // Sorting
-//         const sortOrder = sort === 'asc' ? 1 : -1;
-//         let query = ProductModel.find(searchQuery)
-//             .sort({ [sortBy]: sortOrder }) // Sort by the specified field and order
-//             .populate('category', 'name'); // Populate category name
-
-//         // Pagination
-//         const skip = (page - 1) * limit;
-//         query = query.skip(skip).limit(limit); // Apply pagination
-
-//         // Execute the query to get products
-//         const products = await query;
-
-//         // Return the products
-//         res.status(200).json({ products });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'An error occurred while fetching products' });
-//         next(error);
-//     }
-// };
-  
 
 // function to get all products with search functionality and category as a string field within product model
 export const getAllProducts = async (req, res, next) => {
@@ -207,14 +162,48 @@ export const getProductById = async (req, res, next) => {
 };
 
 
+// get farmer products
+export const getFarmerProducts = async (req, res, next) => {
+    try {
+        const userId = req.user.id;  // Get the user ID from the request
+        console.log('User ID:', userId); // Debugging
+
+        // Find the farmer associated with the user
+        const farmer = await FarmerModel.findOne({ user: userId });
+        if (!farmer) {
+            return res.status(404).json({ message: 'Farmer not found for this user.' });
+        }
+
+        const farmerId = farmer._id;  // Get the farmer's ID
+        console.log('Farmer ID:', farmerId); // Debugging
+
+        // Validate that farmerId is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(farmerId)) {
+            return res.status(400).json({ message: 'Invalid farmer ID.' });
+        }
+
+        // Find all products associated with the farmer
+        const products = await ProductModel.find({ farmer: farmerId });
+
+        res.status(200).json(products);
+    } catch (error) {
+        console.error('Error retrieving farmer products:', error);
+        res.status(500).json({ message: 'An error occurred while retrieving the products' });
+        next(error);
+    }
+};
+
+
+
+
 // function to update product
 export const updateProduct = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { name, description, price, category, stock } = req.body;
+        const userId = req.user.id;  // Get the user ID from the request
 
         // Validate the input using Joi
-        const { error } = productUpdateValidator.validate({ name, price, stock });
+        const { error } = productUpdateValidator.validate(req.body);
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
         }
@@ -222,21 +211,33 @@ export const updateProduct = async (req, res, next) => {
         // Handle file uploads
         let images = [];
         if (req.files && req.files.length > 0) {
-            images = req.files.map(file => file.filename); 
+            images = req.files.map(file => file.filename);
         }
 
         // Prepare the update object
+        const { name, description, price, category, stock } = req.body;
         const updateData = {
             name,
             description,
             price,
             category,
             stock,
+            images: images.length > 0 ? images : undefined, // Only include images if there are any
         };
 
-        // If new images are uploaded, update the images field
-        if (images.length > 0) {
-            updateData.images = images;
+        // Find the farmer associated with the user
+        const farmer = await FarmerModel.findOne({ user: userId });
+        if (!farmer) {
+            return res.status(404).json({ message: 'Farmer not found for this user.' });
+        }
+
+        const farmerId = farmer._id;  // Get the farmer's ID
+
+        // Find the product and check if the farmer matches
+        const product = await ProductModel.findOne({ _id: id, farmer: farmerId });
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found or not authorized to update this product' });
         }
 
         // Update the product
@@ -245,10 +246,6 @@ export const updateProduct = async (req, res, next) => {
             updateData,
             { new: true, runValidators: true }
         );
-
-        if (!updatedProduct) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
 
         res.status(200).json(updatedProduct);
     } catch (error) {
@@ -259,21 +256,38 @@ export const updateProduct = async (req, res, next) => {
 };
 
 
+
+
 // delete a product
 export const deleteProduct = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const userId = req.user.id;  // Get the user ID from the request
 
-        const deletedProduct = await ProductModel.findByIdAndDelete(id);
-
-        if (!deletedProduct) {
-            return res.status(404).json({ message: 'Product not found' });
+        // Find the farmer associated with the user
+        const farmer = await FarmerModel.findOne({ user: userId });
+        if (!farmer) {
+            return res.status(404).json({ message: 'Farmer not found for this user.' });
         }
+
+        const farmerId = farmer._id;  // Get the farmer's ID
+
+        // Find the product and check if the farmer matches
+        const product = await ProductModel.findOne({ _id: id, farmer: farmerId });
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found or not authorized to delete this product' });
+        }
+
+        // Delete the product
+        await ProductModel.findByIdAndDelete(id);
 
         res.status(200).json({ message: 'Product deleted successfully' });
     } catch (error) {
-        console.error(error);
+        console.error('Error deleting product:', error);
         res.status(500).json({ message: 'An error occurred while deleting the product' });
         next(error);
     }
 };
+
+
