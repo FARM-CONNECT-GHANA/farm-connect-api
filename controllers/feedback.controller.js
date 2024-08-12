@@ -1,6 +1,6 @@
 import { FeedbackModel } from '../models/feedback.model.js';
 import { feedbackValidator } from '../utils/validation.js';
-import transporter from '../config/email.js';
+import {transporter} from '../config/email.js';
 
 export const submitFeedback = async (req, res, next) => {
     try {
@@ -21,20 +21,20 @@ export const submitFeedback = async (req, res, next) => {
 
         // Send email to admin
         const adminMailOptions = {
-            from: process.env.EMAIL_USER,
+            from: "user@farmconnect.com",
             to: process.env.ADMIN_EMAIL, 
             subject: `New Feedback Received: ${feedback.subject}`,
-            text: `You have received new feedback from user ${req.user.id}.\n\nMessage:\n${feedback.message}`,
+            text: `You have received new feedback from user ${req.user.firstName}, registered as a ${req.user.role}.\n\nMessage:\n${feedback.message}`,
         };
 
         await transporter.sendMail(adminMailOptions);
 
         // Send confirmation email to the user
         const userMailOptions = {
-            from: process.env.EMAIL_USER,
+            from: "noreply@farmconnect.com",
             to: req.user.email, // Sender's email
             subject: 'Feedback Received',
-            text: `Thank you for your feedback!\n\nSubject: ${feedback.subject}\nMessage: ${feedback.message}`,
+            text: `Thank you for your feedback! Our team will be in touch with you shortly.\n\nSubject: ${feedback.subject}\nMessage: ${feedback.message}`,
         };
 
         await transporter.sendMail(userMailOptions);

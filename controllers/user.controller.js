@@ -7,6 +7,7 @@ import { CustomerModel } from '../models/customer.model.js';
 import { ProductModel } from '../models/product.model.js';
 import { CartModel } from '../models/cart.model.js';
 import { OrderModel } from '../models/order.model.js';
+import { transporter } from '../config/email.js';
 
 // Registration function
 export const register = async (req, res, next) => {
@@ -23,6 +24,13 @@ export const register = async (req, res, next) => {
             ...value,
             password: hashedPassword
         });
+        // Send email to user
+        await transporter.sendMail({
+            from: "noreply@farmconnect.com",
+            to: value.email,
+            subject: "User Account Created!",
+            text: `Dear ${value.firstName}, \n\nA user account has been created for you with the following credentials.\n\nEmail: ${value.email}\nPassword: ${value.password}\nRole: ${value.role}\n\nThank you!`,
+        })
         // Return response
         res.status(201).json('User Registration successful');
     } catch (error) {

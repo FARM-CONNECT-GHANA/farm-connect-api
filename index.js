@@ -13,6 +13,7 @@ import updateOrderRoute from "./routes/subOrder.routes.js";
 import messageRoutes from "./routes/messages.routes.js";
 import { swaggerDocs, swaggerUiSetup } from './config/swagger.js';
 import feedbackRoute from "./routes/feedback.routes.js";
+import errorHandler from "errorhandler";
 
 // Create express app
 const farmconnectapp = express();
@@ -60,6 +61,7 @@ farmconnectapp.get('/', (req, res) => {
 
 // Setup Swagger UI
 farmconnectapp.use('/api-docs', swaggerDocs, swaggerUiSetup);
+farmconnectapp.use(errorHandler({log: false}));
 
 // Setup Socket.IO connection
 // io.on('connection', (socket) => {
