@@ -8,7 +8,7 @@ const cartRoutes = Router();
  * @openapi
  * /cart:
  *   post:
- *     summary: Add an item to the cart
+ *     summary: Add an item to the cart/ update cart item quantity-increment and decrement
  *     description: This endpoint allows a user to add a new item to/ update their cart.
  *     tags:
  *       - Cart

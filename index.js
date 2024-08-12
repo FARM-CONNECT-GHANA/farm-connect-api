@@ -62,18 +62,58 @@ farmconnectapp.get('/', (req, res) => {
 farmconnectapp.use('/api-docs', swaggerDocs, swaggerUiSetup);
 
 // Setup Socket.IO connection
-io.on('connection', (socket) => {
-    console.log('A user connected');
+// io.on('connection', (socket) => {
+//     console.log('A user connected');
 
-    socket.on('disconnect', () => {
-        console.log('A user disconnected');
+//     socket.on('disconnect', () => {
+//         console.log('A user disconnected');
+//     });
+
+//     socket.on('error', (error) => {
+//         console.error('Socket.IO error:', error);
+//     });
+
+// });
+
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+
+    // Handle real-time messaging
+    socket.on('sendMessage', (message) => {
+        console.log('Message received:', message);
+        // Emit the message to the intended recipient
+        socket.to(receiverId).emit('receiveMessage', message);
     });
 
+    // Handle notifications
+    socket.on('sendNotification', (notification) => {
+        console.log('Notification received:', notification);
+        // Emit the notification to the intended recipient
+       socket.to(recipientId).emit('receiveNotification', notification);
+    });
+
+    // Handle user disconnection
+    socket.on('disconnect', () => {
+        console.log('A user disconnected:', socket.id);
+    });
+
+    // Handle errors
     socket.on('error', (error) => {
         console.error('Socket.IO error:', error);
     });
 
+    // Optionally, handle custom events or rooms
+    socket.on('joinRoom', (room) => {
+        socket.join(room);
+        console.log(`User ${socket.id} joined room ${room}`);
+    });
+
+    socket.on('leaveRoom', (room) => {
+        socket.leave(room);
+        console.log(`User ${socket.id} left room ${room}`);
+    });
 });
+
 
 // Listen for incoming requests
 const port = process.env.PORT || 8090;
