@@ -41,7 +41,7 @@ const options = {
     './routes/order.routes.js', // Path to order routes file
     './routes/subOrder.routes.js', // Path to suborder routes file
     './routes/feedback.routes.js', // Path to feedback routes file
-    './routes/notification.routes.js' // Path to notification routes file
+    './routes/messages.routes.js' // Path to message routes file
   ],
 };
 

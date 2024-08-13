@@ -115,7 +115,9 @@ export const notificationValidator = Joi.object({
       .default(false)
       .messages({
         'boolean.base': 'Read status must be a boolean'
-      })
+      }),
+      sender: Joi.string().required(),
+    recipient: Joi.string().required(),
   });
 
 

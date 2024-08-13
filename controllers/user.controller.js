@@ -26,7 +26,7 @@ export const register = async (req, res, next) => {
         });
         // Send email to user
         await transporter.sendMail({
-            from: "noreply@farmconnect.com",
+            from: process.env.EMAIL_FROM,
             to: value.email,
             subject: "User Account Created!",
             text: `Dear ${value.firstName}, \n\nA user account has been created for you with the following credentials.\n\nEmail: ${value.email}\nPassword: ${value.password}\nRole: ${value.role}\n\nThank you!`,

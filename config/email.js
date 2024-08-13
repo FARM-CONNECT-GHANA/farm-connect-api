@@ -1,11 +1,14 @@
-import {createTransport} from 'nodemailer';
+import { createTransport } from "nodemailer";
 
 export const transporter = createTransport({
-    host: "sandbox.smtp.mailtrap.io", 
-    port: 2525,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USERNAME, 
-        pass: process.env.SMTP_PASSWORD, 
-    },
+  host: "smtp.zoho.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USERNAME,
+    pass: process.env.SMTP_PASSWORD,
+  }
+//   tls: {
+//     ciphers: "SSLv3",
+//   },
 });

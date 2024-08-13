@@ -21,7 +21,7 @@ export const submitFeedback = async (req, res, next) => {
 
         // Send email to admin
         const adminMailOptions = {
-            from: "user@farmconnect.com",
+            from: process.env.EMAIL_FROM,
             to: process.env.ADMIN_EMAIL, 
             subject: `New Feedback Received: ${feedback.subject}`,
             text: `You have received new feedback from user ${req.user.firstName}, registered as a ${req.user.role}.\n\nMessage:\n${feedback.message}`,
@@ -31,7 +31,7 @@ export const submitFeedback = async (req, res, next) => {
 
         // Send confirmation email to the user
         const userMailOptions = {
-            from: "noreply@farmconnect.com",
+            from: process.env.EMAIL_FROM,
             to: req.user.email, // Sender's email
             subject: 'Feedback Received',
             text: `Thank you for your feedback! Our team will be in touch with you shortly.\n\nSubject: ${feedback.subject}\nMessage: ${feedback.message}`,
