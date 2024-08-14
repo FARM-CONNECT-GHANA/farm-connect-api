@@ -8,7 +8,7 @@ const feedbackRoute = Router();
  * @openapi
  * /feedback:
  *   post:
- *     summary: Submit user feedback
+ *     summary: Submit user feedback(complains, suggestions) to support email and sends back confirmation email to user
  *     description: Allows authenticated users to submit feedback, which is then saved in the database and triggers email notifications to both the admin and the user.
  *     tags:
  *       - Feedback

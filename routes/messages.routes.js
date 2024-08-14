@@ -175,7 +175,7 @@ messageRoutes.get('/messages/conversation', getMessagesBetweenUsers);
  * @openapi
  * /messages/{userId}:
  *   get:
- *     summary: Get messages by user ID
+ *     summary: Get messages by user ID- displays message history
  *     description: Retrieves all messages sent or received by a specific user.
  *     tags:
  *       - Messages

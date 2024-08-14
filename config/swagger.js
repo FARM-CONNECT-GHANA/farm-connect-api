@@ -40,8 +40,8 @@ const options = {
     './routes/cart.routes.js', // Path to cart routes file
     './routes/order.routes.js', // Path to order routes file
     './routes/subOrder.routes.js', // Path to suborder routes file
-    './routes/feedback.routes.js', // Path to feedback routes file
-    './routes/messages.routes.js' // Path to message routes file
+    './routes/messages.routes.js', // Path to message routes file
+    './routes/feedback.routes.js' // Path to feedback routes file
   ],
 };
 
