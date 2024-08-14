@@ -15,7 +15,7 @@ const swaggerDefinition = {
       description: 'Local API server',
     },
     {
-      url: `https://${process.env.RENDER_URL}`,
+      url: process.env.RENDER_URL,
       description: 'Production API server',
     },
   ],  
