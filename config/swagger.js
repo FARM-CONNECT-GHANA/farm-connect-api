@@ -12,9 +12,13 @@ const swaggerDefinition = {
   servers: [
     {
       url: `http://localhost:${process.env.PORT || 8090}`,
-      description: 'API server',
+      description: 'Local API server',
     },
-  ],
+    {
+      url: `https://${process.env.RENDER_URL}`,
+      description: 'Production API server',
+    },
+  ],  
   components: {
     securitySchemes: {
       bearerAuth: {
