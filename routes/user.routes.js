@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCustomerProfile, createFarmerProfile, getCustomerProfile, getFarmerProfile, register, tokenLogin, updateCustomerProfile, updateFarmerProfile } from "../controllers/user.controller.js";
+import { createCustomerProfile, createFarmerProfile, getCustomerProfile, getFarmerProfile, logout, register, tokenLogin, updateCustomerProfile, updateFarmerProfile } from "../controllers/user.controller.js";
 import { remoteUpload } from "../middlewares/upload.js";
 import { authenticated, authorized } from "../middlewares/auth.middleware.js";
 
@@ -74,6 +74,26 @@ userRoutes.post('/register', register)
  *         description: Unauthorized
  */
 userRoutes.post('/login', tokenLogin)
+
+/**
+ * @openapi
+ * /users/logout:
+ *   post:
+ *     summary: Logout a user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     description: Logs out the authenticated user by invalidating their access token.
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       401:
+ *         description: No token provided or user is not authenticated
+ *       500:
+ *         description: Logout failed due to a server error
+ */
+userRoutes.post('/logout', authenticated, logout)
 
 /**
  * @openapi

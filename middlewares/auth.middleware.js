@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/user.model.js';
+import blacklistedTokens from '../utils/blacklist.js';
 
 // authentication middleware
 export const authenticated = async (req, res, next) => {
@@ -9,6 +10,12 @@ export const authenticated = async (req, res, next) => {
     if (!token) {
       console.log('No token provided');
       return res.status(401).json({ error: 'Authentication required' });
+    }
+
+     // Check if the token is blacklisted
+     if (blacklistedTokens.has(token)) {
+      console.log('Token is blacklisted:', token);
+      return res.status(401).json({ error: 'Token is blacklisted' });
     }
 
     const secretKey = process.env.JWT_SECRET;

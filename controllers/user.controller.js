@@ -8,6 +8,7 @@ import { ProductModel } from '../models/product.model.js';
 import { CartModel } from '../models/cart.model.js';
 import { OrderModel } from '../models/order.model.js';
 import { transporter } from '../config/email.js';
+import blacklistedTokens from '../utils/blacklist.js';
 
 // Registration function
 export const register = async (req, res, next) => {
@@ -79,6 +80,28 @@ export const tokenLogin = async (req, res, next) => {
       next(error);
     }
   };
+
+// function to blacklist token
+
+export const logout = (req, res, next) => {
+    try {
+        // Get the token from the request header
+        const token = req.header('Authorization').replace('Bearer ', '');
+
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided, unable to log out' });
+        }
+
+        // Add the token to the blacklist
+        blacklistedTokens.add(token);
+
+        res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        res.status(500).json({ message: 'Logout failed, please try again' });
+        next(error);
+    }
+};
+
 
 // function to create farmer profile
 export const createFarmerProfile = async (req, res, next) => {
